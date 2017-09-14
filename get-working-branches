@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Functions
+function appendPeriods 
+{
+   baseString="$1"
+   BASE_COUNT=50;
+   counter=`expr $BASE_COUNT - ${#baseString}`
+   
+   while [ $counter -gt 0 ]; do
+      result="$result."
+      let counter-=1
+   done
+   echo "$result"
+}
+
+function printHelp
+{
+   printf "\nusage: -h [[path | p] path]\n"
+   printf "\nArguments:\n"
+   printf "'-'p or '--'path (with path name)       Gets all repo names for supplied paths child directories\n"
+   printf "'-'h or '--'help                        Print Help (this message) and exit\n"
+}
+
+# Set default path, then get path, if povided
+path=$(pwd) 
+while [[ $# > 0 ]]
+do
+key="$1"
+
+case $key in
+  -h)
+      printHelp
+      exit 1
+      ;;
+  --help)
+      printHelp
+      exit 1
+      ;;
+  --path)
+    path="$2"
+    shift
+    ;;
+  -p)
+   path="$2"
+   shift
+   ;;
+  *)
+    # unknown option
+    path="."
+    ;;
+esac
+shift
+done
+
+path="$path/*"
+
+# Loop through all immidiate child directories
+for dir in $path ; do
+   if [ -d "$dir" ] && [ -x "$dir" ]; then
+      cd $dir
+      branch="$(git branch |grep \* | cut -b 3-10000 2>/dev/null)" 
+     
+      if [ "$branch" == "develop" ]; then
+         branch="\033[0;32m${branch}\033[0m"
+      elif [ "$branch" == "master" ]; then
+         branch="\033[0;31m${branch}\033[0m"
+      else
+         branch="\033[0;33m${branch}\033[0m"
+      fi
+
+      module=${PWD##*/}
+      spacer=$(appendPeriods $module)
+      printf "$module$spacer${branch}\n"
+      cd ..
+   fi
+done
+

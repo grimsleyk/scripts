@@ -1,0 +1,43 @@
+#!/bin/bash
+
+usage()
+{
+cat << EOF
+usage: $0 options
+
+OPTIONS:
+   -h      Shows this message
+   -e      Startup environment [dev|qa]
+   -i      Instance type [server|client]
+EOF
+}
+
+logScript="/Users/kevin/Documents/Projects/uss-local-environment/scripts/remote-php-log.sh"
+logFile="/logs/koodo/response.log"
+
+while [[ $# > 0 ]]
+do
+key="$1"
+
+case $key in
+  -m | --message)
+    message="$2"
+    shift
+    ;;
+ -d | --display)
+   display=true
+   ;;
+  *)
+    # unknown option
+    ;;
+esac
+shift
+done
+
+# execute log to get responses
+echo $logScript
+bash $logScript | grep $message >> $logFile
+
+if [ "$display" = true ] ; then
+  echo ya
+fi

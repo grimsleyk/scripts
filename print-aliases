@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Functions
+function appendPeriods {
+   baseString="$1"
+   BASE_COUNT=20;
+   counter=`expr $BASE_COUNT - ${#baseString}`
+
+   while [ $counter -gt 0 ]; do
+      result="$result."
+      let counter-=1
+   done
+   echo "$result"
+}
+
+# Parameters
+while [[ $# > 0 ]]
+do
+key="$1"
+
+case $key in
+  -a)
+    filter="alias $2"
+    shift
+    ;;
+  -f)
+	filter="$2"
+	shift
+    ;;
+  -p)
+    projectFilter="$2"
+    ;;
+  *) 
+    # unknown option
+    ;;
+esac
+shift
+done
+
+cat ~/.aliases |grep alias |grep "$filter" |while read -r line; do
+   aliasName=$(echo $line|cut -b 7-10000)
+   aliasName=$(echo $aliasName|cut -d '=' -f 1)
+   spacer=$(appendPeriods $aliasName)
+   aliasDescription=$(echo $line|cut -d '#' -f 2)
+ 
+   printf "$aliasName $spacer$aliasDescription\n"
+done

@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Functions
+function printHelp
+{
+   printf "\n"
+   printf "description: gets the current status for all git projects in current directory\n"
+   printf "\nusage: -h [[path | p] path]\n"
+   printf "\nArguments:\n"
+   printf "'-'h or '--'help                        Print Help (this message) and exit\n"
+   printf "\n"
+}
+
+# Set default path, then get path, if povided
+path=$(pwd) 
+while [[ $# > 0 ]]
+do
+key="$1"
+
+case $key in
+  -h)
+      printHelp
+      exit 1
+      ;;
+  --help)
+      printHelp
+      exit 1
+      ;;
+  *)
+    # unknown option
+    ;;
+esac
+shift
+done
+
+path="$path/*"
+
+# Loop through all immidiate child directories
+for dir in $path ; do
+   if [ -d "$dir" ] && [ -x "$dir" ]; then
+     # branch="$(git branch |grep \* | cut -b 3-10000 2>/dev/null)" 
+     cd $dir
+     project=${PWD##*/}
+     printf "Project: $project\n"
+     git fetch > /dev/null 2>&1
+     git status |grep 'Your branch'
+     printf "\n"
+     cd ..
+   fi
+done
+
