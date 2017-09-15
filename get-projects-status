@@ -35,17 +35,27 @@ done
 
 path="$path/*"
 
-# Loop through all immidiate child directories
+# Loop through all imidiate child directories
 for dir in $path ; do
    if [ -d "$dir" ] && [ -x "$dir" ]; then
-     # branch="$(git branch |grep \* | cut -b 3-10000 2>/dev/null)" 
+     # get project
      cd $dir
      project=${PWD##*/}
-     printf "Project: $project\n"
+
+     # fetch latest from repo
      git fetch > /dev/null 2>&1
-     git status |grep 'Your branch'
-     printf "\n"
+
+     # get any non fatal status
+     gitStatus="$(git status 2> /dev/null |grep 'Your branch')"
+
+     # print status if found
+     if [[ $gitStatus == *"Your branch"* ]]; then
+          printf "Project: $project\n"
+       printf "$gitStatus";
+       printf "\n\n"
+     fi
+
+     # navigate back to reset loop
      cd ..
    fi
 done
-
